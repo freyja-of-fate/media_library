@@ -10,6 +10,7 @@ import Register from "./components/users/Register";
 import Login from "./components/users/Login";
 import UserView from "./components/users/UserView";
 import UserEdit from "./components/users/UserEdit";
+import SecondFactorAuth from "./components/users/SecondFactorAuth";
 import MediaUpload from "./components/media/MediaUpload";
 import MediaList from "./components/media/MediaList";
 import MediaView from "./components/media/MediaView";
@@ -54,6 +55,7 @@ const router = createBrowserRouter([
       { path: "users/login", element: <Login /> },
       { path: "users/:id", element: <UserView /> },
       { path: "users/:id/edit", element: <UserEdit /> },
+      { path: "users/2fa", element: <SecondFactorAuth /> },
 
       { path: "media/upload", element: <MediaUpload /> },
       { path: "media", element: <MediaList /> },

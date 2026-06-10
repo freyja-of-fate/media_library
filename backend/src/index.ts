@@ -24,6 +24,7 @@ import { authenticate } from "./middleware/auth";
 const publicRoutes: { method: string, path: string }[] = [
   { method: "POST", path: "/api/users/register" },
   { method: "POST", path: "/api/users/login" },
+  { method: "POST", path: "/api/users/login/totp" },
   { method: "GET", path: "/api/health" },
 ];
 

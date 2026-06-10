@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import FormAlerts from '@/components/common/FormAlerts';
 import { useTabTitle } from '@/hooks/useTabTitle';
@@ -16,6 +16,7 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
+  const navigate = useNavigate();
 
   // Set title
   useTabTitle('Login');
@@ -27,8 +28,24 @@ const Login = () => {
 
     try {
       const data = await userService.login(username, password);
-      login(data.token, data.user);
-      // No need for navigate - login() handles it
+
+      // challenge
+      if(data.type === "challenge") {
+        navigate('/users/2fa', {
+          state: {
+            mode: "login",
+            challenge_token: data.challenge_token
+          }
+        })
+      }
+
+      // success
+      if(data.type === "success") {
+        login(data.token, data.user);
+        if(data.user) {
+          navigate(`/users/${data.user.id}`)
+        }
+      }
     } catch (err) {
       if (err instanceof ApiException) {
         setError(err.message);

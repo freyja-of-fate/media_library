@@ -4,6 +4,7 @@ import { userService, ApiException } from '@/api';
 interface User {
   id: number;
   username: string;
+  totp_enabled?: boolean;
 }
 
 interface AuthContextType {
@@ -58,7 +59,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem('user', JSON.stringify(newUser));
     setToken(newToken);
     setCurrentUser(newUser);
-    window.location.href = `/users/${newUser.id}`;
   };
 
   const logout = () => {

@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import FormAlerts from '@/components/common/FormAlerts';
 import { useTabTitle } from '@/hooks/useTabTitle';
+import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -19,6 +20,7 @@ const Register = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
+  const navigate = useNavigate();
 
   useTabTitle('Register')
 
@@ -44,7 +46,12 @@ const Register = () => {
     try {
       const data = await userService.register(formData.username, formData.password);
       login(data.token, data.user);
-      // No need for navigate - login() handles it
+
+      if(data.user) {
+        navigate("/users/2fa", {
+          state: { mode: "setup" }
+        })
+      }
     } catch (err) {
       if (err instanceof ApiException) {
         setError(err.message);

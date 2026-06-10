@@ -161,6 +161,25 @@ const UserView = () => {
                   </span>
                 </div>
               )}
+
+              {isOwnProfile &&
+                <div className="flex justify-between py-2 border-b">
+                  <span className="text-muted-foreground">2FA:</span>
+                  <span className="font-medium">
+                    {user.totp_enabled
+                      ? <Button variant="destructive" asChild>
+                          <Link to="/users/2fa"
+                            state={{
+                              mode: "disable"
+                            }}>Disable</Link>
+                        </Button>
+                      : <Button variant="outline" asChild>
+                          <Link to="/users/2fa" state={{ mode: "setup" }}>Click to Setup</Link>
+                        </Button>
+                    }
+                  </span>
+                </div>
+              }
             </div>
           </div>
         </CardContent>
