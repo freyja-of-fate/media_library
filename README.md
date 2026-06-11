@@ -1,4 +1,5 @@
 # Media Library
+![Dashboard](docs/images/main.png)
 Self-hosted media library that lets you organize, track, and manage all your personal media in one place. Unlike relying on multiple websites or platforms, this project aims to give you full control over your media collection — whether it's movies, TV shows, music, or even obscure books. 
 
 ## Frameworks/Tools
@@ -8,6 +9,18 @@ Self-hosted media library that lets you organize, track, and manage all your per
 #### Backend:
 - Express
 - MariaDB
+
+## Authentication & Security
+
+![Auth Flow](docs/images/auth.png)
+
+- Secure user authentication with password hashing (bcrypt)
+- JWT-based session authentication
+- Two-factor authentication (2FA) using TOTP (Google Authenticator / Authy compatible)
+- QR code-based 2FA setup flow
+- Challenge-based login flow for users with 2FA enabled
+- Recovery codes for account access if TOTP device is unavailable
+- Ability to enable/disable 2FA securely with re-verification
 
 ## Docker Setup
 
