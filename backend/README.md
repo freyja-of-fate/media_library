@@ -1,391 +1,310 @@
-# Backend
+# Media Library Backend
 
-## Requirements
-- Node.js (v16+ recommended)
-- MariaDB Server (v10.5+)
-- npm or yarn
+A REST API for managing media, characters, user libraries, ratings, reviews, and authentication.
 
-## Setup
+Built with:
 
-### 1. Install Dependencies
+* Node.js
+* Express
+* TypeScript
+* MariaDB
+* Knex.js
+* JWT Authentication
+* TOTP Two-Factor Authentication
+
+---
+
+# Features
+
+* User registration and authentication
+* JWT-based authorization
+* TOTP two-factor authentication (2FA)
+* Media management
+* Character management
+* Media-character relationships
+* Personal media libraries
+* Ratings and reviews
+* Search and autocomplete endpoints
+* Image uploads
+* MariaDB database with migrations and seeds
+
+---
+
+# Documentation
+
+## API Documentation
+
+Complete API documentation is available in:
+
+```text
+docs/api.md
+```
+
+This includes:
+
+* Authentication flows
+* Request/response examples
+* Endpoint reference
+* Filtering and sorting options
+* Error responses
+
+---
+
+# Requirements
+
+* Node.js 16+
+* MariaDB 10.5+
+* npm or yarn
+
+---
+
+# Installation
+
+## 1. Install Dependencies
+
 ```bash
 npm install
 ```
 
-### 2. Configure Environment
+## 2. Configure Environment
+
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` with your credentials:
+Example configuration:
+
 ```dotenv
-# Environment
 NODE_ENV=development
 PORT=3000
 
-# Database
 DB_HOST=localhost
 DB_NAME=media_library
 DB_USER=root
 DB_PASS=your_password
 
-# JWT Authentication
-JWT_SECRET=your-super-secret-key-change-this-in-production
+JWT_SECRET=change-me
 JWT_EXPIRES_IN=604800
 ```
 
-**Generate a strong JWT_SECRET for production:**
-```bash
-# Linux/Mac
-openssl rand -base64 32
+Generate a secure JWT secret:
 
-# Node.js (any platform)
+```bash
+openssl rand -base64 32
+```
+
+or
+
+```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 ```
 
-### 3. Setup Database
-```bash
-# First time setup (creates database, runs migrations, seeds data)
-npm run setup
+## 3. Setup Database
 
-# Or reset everything and start fresh
+```bash
+npm run setup
+```
+
+Or reset everything:
+
+```bash
 npm run setup:reset
 ```
 
-## Running the Application
+---
 
-### Development
+# Running the Application
+
+## Development
+
 ```bash
 npm run dev
 ```
-Server runs on `http://localhost:3000` (or your configured PORT)
 
-### Production
+Default:
+
+```text
+http://localhost:3000
+```
+
+## Production
+
 ```bash
 npm run build
 npm start
 ```
 
-## API Authentication
+---
 
-The API uses JWT (JSON Web Token) authentication. All endpoints except `/api/users/register` and `/api/users/login` require authentication.
+# Database Management
 
-### Authentication Flow
+## Migrations
 
-**1. Register a new user:**
-```http
-POST /api/users/register
-Content-Type: application/json
+Run pending migrations:
 
-{
-  "username": "testuser",
-  "password": "password123"
-}
-```
-
-**Response:**
-```json
-{
-  "message": "User registered successfully",
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "user": {
-    "id": 1,
-    "username": "testuser"
-  }
-}
-```
-
-**2. Login (for returning users):**
-```http
-POST /api/users/login
-Content-Type: application/json
-
-{
-  "username": "testuser",
-  "password": "password123"
-}
-```
-
-**Response:**
-```json
-{
-  "message": "Login successful",
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "user": {
-    "id": 1,
-    "username": "testuser"
-  }
-}
-```
-
-**3. Use the token in protected endpoints:**
-```http
-GET /api/media/types
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
-
-### Password Requirements
-- Minimum 6 characters
-- No special character requirements (configurable in code)
-
-### Token Configuration
-- **Expiration:** `JWT_EXPIRES_IN` in seconds (default: 604800 = 7 days)
-- **Secret:** `JWT_SECRET` - **must be set in production with a strong random string**
-
-## API Endpoints
-
-### Public Endpoints (No Authentication)
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/users/register` | Register new user |
-| POST | `/api/users/login` | Login user |
-
-### Protected Endpoints (Authentication Required)
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| DELETE | `/api/users` | Delete current user account |
-| GET | `/api/media/types` | Get all media types |
-
-**All protected endpoints require:**
-- `Authorization: Bearer <token>` header
-- Valid, non-expired JWT token
-
-## Database Management
-
-### Migrations
-Migrations define your database schema and are version-controlled in `/backend/migrations/`.
-
-**Common commands:**
 ```bash
-# Run all pending migrations
 npm run migrate
+```
 
-# Create a new migration
-npm run migrate:make add_column_to_users
+Create a migration:
 
-# Check migration status
-npm run migrate:status
+```bash
+npm run migrate:make migration_name
+```
 
-# Rollback last migration batch
+Rollback latest migration batch:
+
+```bash
 npm run migrate:rollback
 ```
 
-**Important notes:**
-- Migrations run in **timestamp order** (based on filename)
-- Always create tables with foreign keys **after** their referenced tables
-- Use descriptive migration names: `create_users_table`, `add_email_to_users`
+Check migration status:
 
-### Seeds
-Seeds populate tables with default/test data, stored in `/backend/seeds/`.
-
-**Common commands:**
 ```bash
-# Run all seed files
+npm run migrate:status
+```
+
+## Seeds
+
+Run seeds:
+
+```bash
 npm run seed
-
-# Create a new seed
-npm run seed:make add_default_media_types
 ```
 
-**Seed best practices:**
-- Use `.onConflict().ignore()` to prevent duplicate insertions on re-runs
-- Order seeds by table dependencies (lookup tables first)
-- Keep seeds idempotent (safe to run multiple times)
+Create a seed:
 
-## Available Scripts
-
-| Script | Description |
-|--------|-------------|
-| `npm run dev` | Start development server with hot reload |
-| `npm run build` | Compile TypeScript to JavaScript |
-| `npm start` | Run compiled production build |
-| `npm run setup` | First-time setup (create DB + migrate + seed) |
-| `npm run setup:reset` | **Nuclear option** - drops DB and recreates everything |
-| `npm run migrate` | Run pending migrations |
-| `npm run migrate:make <name>` | Create new migration |
-| `npm run migrate:rollback` | Undo last migration batch |
-| `npm run migrate:status` | Show which migrations have run |
-| `npm run seed` | Run seed files |
-| `npm run seed:make <name>` | Create new seed |
-
-## Database Architecture
-
-### Technology Stack
-- **Database:** MariaDB/MySQL
-- **Driver:** mysql2
-- **Query Builder:** Knex.js
-- **ORM:** None (using Knex query builder)
-- **Connection Pooling:** Min: 2, Max: 10
-- **Authentication:** JWT + bcrypt password hashing
-
-markdown### Database Schema
-
-**Core Tables:**
-- `user` - User accounts with authentication
-  - `id` (PK, auto-increment)
-  - `username` (unique, indexed)
-  - `password` (bcrypt hashed)
-  - `created_at` (timestamp)
-
-- `media` - Media items (novels, TV series, anime, movies, comics, manga, video games)
-  - `id` (PK, auto-increment)
-  - `title` (varchar 255)
-  - `media_type_id` (FK → media_types)
-  - `release_year` (integer, nullable)
-  - `media_status_id` (FK → media_status_types)
-  - `description` (text, nullable)
-
-- `character` - Character information with flexible JSON details
-  - `id` (PK, auto-increment)
-  - `name` (varchar 255)
-  - `details` (JSON, nullable) - Stores flexible character data (aliases, background, personality, appearance, relationships, species, gender, age, occupation, etc.)
-  - `wiki_url` (varchar 512, nullable)
-  - `created_at` (timestamp)
-  - `updated_at` (timestamp)
-
-- `tag` - Tags for categorization
-  - `id` (PK, auto-increment)
-  - `name` (varchar 128)
-  - `tag_type_id` (FK → tag_types)
-
-**Lookup Tables (enum-like):**
-- `media_types` - Types of media
-  - `id` (PK, auto-increment)
-  - `name` (varchar 64, unique) - Values: novel, tv_series, anime, movie, comic, manga, video_game
-
-- `media_status_types` - Production/release status
-  - `id` (PK, auto-increment)
-  - `name` (varchar 64, unique) - Values: ongoing, completed, hiatus, upcoming
-
-- `character_roles` - Character roles in media
-  - `id` (PK, auto-increment)
-  - `name` (varchar 64, unique) - Values: protagonist, antagonist, supporting, cameo, guest, deuteragonist, tritagonist
-
-- `user_media_status_types` - User's consumption status
-  - `id` (PK, auto-increment)
-  - `name` (varchar 64, unique) - Values: planning, watching, completed, dropped, on_hold
-
-- `tag_types` - Tag categories
-  - `id` (PK, auto-increment)
-  - `name` (varchar 64, unique) - Values: genre, theme, demographic
-
-**Junction Tables (many-to-many relationships):**
-- `media_character` - Links characters to media with their role
-  - `id` (PK, auto-increment)
-  - `media_id` (FK → media, CASCADE delete)
-  - `character_id` (FK → character, CASCADE delete)
-  - `role_id` (FK → character_roles, RESTRICT delete)
-  - Unique constraint: (`media_id`, `character_id`)
-
-- `media_tag` - Links tags to media
-  - `id` (PK, auto-increment)
-  - `media_id` (FK → media, CASCADE delete)
-  - `tag_id` (FK → tag, CASCADE delete)
-  - Unique constraint: (`media_id`, `tag_id`)
-
-- `user_media` - User's media tracking (progress, ratings, reviews)
-  - `id` (PK, auto-increment)
-  - `user_id` (FK → user, CASCADE delete)
-  - `media_id` (FK → media, CASCADE delete)
-  - `current_progress` (varchar 255, nullable) - e.g., "Season 2 Episode 5", "Chapter 120"
-  - `status_id` (FK → user_media_status_types, RESTRICT delete, nullable)
-  - `progress_updated` (timestamp, nullable)
-  - `score` (decimal 3,1, nullable) - Rating from 1.0 to 10.0
-  - `review` (text, nullable)
-  - `rating_created` (timestamp, nullable)
-  - `created_at` (timestamp)
-  - Unique constraint: (`user_id`, `media_id`)
-
-**Naming Conventions:**
-- Tables: `snake_case` (lowercase with underscores)
-- Primary keys: `id` (auto-increment integer)
-- Foreign keys: `<table>_id` (e.g., `media_id`, `user_id`)
-- Junction tables: `<table1>_<table2>` (alphabetically ordered)
-- All timestamps use MySQL `TIMESTAMP` type with `DEFAULT CURRENT_TIMESTAMP`
-
-**Foreign Key Constraints:**
-- CASCADE: Automatically delete related records when parent is deleted (used for junction tables and dependent data)
-- RESTRICT: Prevent deletion if referenced elsewhere (used for lookup/enum tables to maintain data integrity
-
-## Environment-Specific Deployment
-
-The application supports multiple environments via `NODE_ENV`.
-
-### Development (default)
 ```bash
-NODE_ENV=development npm run migrate
-npm run dev
+npm run seed:make seed_name
 ```
 
-### Staging
+---
+
+# Available Scripts
+
+| Script                   | Description                        |
+| ------------------------ | ---------------------------------- |
+| npm run dev              | Start development server           |
+| npm run build            | Compile TypeScript                 |
+| npm start                | Start production server            |
+| npm run setup            | Create database, migrate, and seed |
+| npm run setup:reset      | Recreate database from scratch     |
+| npm run migrate          | Run pending migrations             |
+| npm run migrate:make     | Create migration                   |
+| npm run migrate:rollback | Rollback migrations                |
+| npm run migrate:status   | Show migration status              |
+| npm run seed             | Run seed files                     |
+| npm run seed:make        | Create seed                        |
+
+---
+
+# Environment Configuration
+
+The application supports multiple environments through `NODE_ENV`.
+
+## Development
+
 ```bash
-NODE_ENV=staging npm run migrate
-NODE_ENV=staging npm start
+NODE_ENV=development
 ```
 
-### Production
+## Staging
+
 ```bash
-NODE_ENV=production npm run migrate
-NODE_ENV=production npm start
+NODE_ENV=staging
 ```
 
-**Environment-specific configuration is in `knexfile.js`**
+## Production
 
-## Project Structure
+```bash
+NODE_ENV=production
 ```
+
+Knex configuration is managed through:
+
+```text
+knexfile.js
+```
+
+---
+
+# Project Structure
+
+```text
 backend/
+├── docs/
+│   └── api.md
+│
 ├── src/
-│   ├── index.ts              # Express app & server entry point
-│   ├── db.ts                 # Knex connection instance
 │   ├── routes/
-│   │   ├── users.ts          # User auth & management routes
-│   │   └── media.ts          # Media CRUD routes
 │   ├── middleware/
-│   │   └── auth.ts           # JWT authentication middleware
-│   └── utils/
-│       └── auth.ts           # Auth helpers (hash, compare, generate token)
-├── migrations/               # Database schema migrations (JS)
-├── seeds/                    # Default/test data (JS)
-├── dist/                     # Compiled JavaScript (gitignored)
-├── knexfile.js              # Knex configuration (dev/staging/prod)
-├── setup-db.ts              # Database creation script
-├── tsconfig.json            # TypeScript configuration
-├── nodemon.json             # Nodemon configuration
-├── package.json             # Dependencies & scripts
-├── .env                     # Environment variables (gitignored)
-├── .env.example             # Environment template (committed)
-└── README.md                # This file
+│   ├── utils/
+│   ├── db.ts
+│   └── index.ts
+│
+├── migrations/
+├── seeds/
+├── dist/
+│
+├── knexfile.js
+├── setup-db.ts
+├── package.json
+├── tsconfig.json
+├── .env.example
+└── README.md
 ```
 
-## Security Best Practices
+---
 
-### Required for Production
-- [ ] Use a **strong random JWT_SECRET** (32+ characters)
-- [ ] Enable **HTTPS only** for API endpoints
-- [ ] Set secure **CORS** policies
-- [ ] Use environment variables for all secrets
-- [ ] Never commit `.env` to version control
-- [ ] Implement **rate limiting** on auth endpoints
-- [ ] Add **input validation** and sanitization
-- [ ] Use **prepared statements** (Knex does this by default)
+# Database Overview
 
-### Recommended Enhancements
-- Add refresh token mechanism
-- Implement password reset flow
-- Add email verification
-- Set up logging and monitoring
-- Implement role-based access control (RBAC)
-- Add request validation middleware (e.g., express-validator)
-- Set up automated backups
+The database is structured around:
 
-## Contributing
+* Users
+* Media
+* Characters
+* Tags
+* User Libraries
+* Ratings & Reviews
+* Media Character Relationships
 
-When adding new features:
-1. Create a migration for schema changes: `npm run migrate:make <description>`
-2. Update seeds if adding lookup table values
-3. Add appropriate authentication to new routes
-4. Update this README with new endpoints
-5. Test in development before deploying
+Schema changes are managed through Knex migrations.
 
-## License
+---
+
+# Security
+
+## Production Checklist
+
+* Use a strong JWT secret
+* Enable HTTPS
+* Configure CORS properly
+* Keep secrets in environment variables
+* Never commit `.env`
+* Implement rate limiting
+* Validate user input
+* Keep dependencies updated
+
+## Authentication
+
+* Passwords are hashed using bcrypt
+* JWT access tokens are used for authentication
+* Optional TOTP-based two-factor authentication is supported
+
+---
+
+# Contributing
+
+When adding new functionality:
+
+1. Create migrations for schema changes
+2. Update seed data if required
+3. Add authentication where appropriate
+4. Update API documentation
+5. Test before merging
+
+---
+
+# License
+
 MIT
